@@ -1,15 +1,18 @@
 // Initialize Firebase
 var config = {
-  apiKey: "AIzaSyDJN1IsEC4P58M-gufXuY6LNHwRbZP3PBo",
-  authDomain: "train-3e25b.firebaseapp.com",
-  databaseURL: "https://train-3e25b.firebaseio.com",
-  projectId: "train-3e25b",
-  storageBucket: "",
-  messagingSenderId: "501323863503"
+  apiKey: "AIzaSyBd8AO_nDPkxZ4ivl9RF99XwuwvP7azilk",
+  authDomain: "trainferat-26ef7.firebaseapp.com",
+  databaseURL: "https://trainferat-26ef7.firebaseio.com",
+  projectId: "trainferat-26ef7",
+  storageBucket: "trainferat-26ef7.appspot.com",
+  messagingSenderId: "613461100860"
 };
-firebase.initializeApp(config);
+var database;
 
-var database = firebase.database();
+firebase.initializeApp(config);
+database = firebase.database();
+
+
 
 
 
@@ -20,13 +23,15 @@ $("#add-btn").on("click", function (event) {
 
   var destination = $("#dest").val().trim();
 
-  var firstTime = moment($("#first").val().trim(), "hh:mm").subtract(1, "years".format);
+  var firstTime = moment($("#first").val().trim(), "HH:mm").format("HH:mm");
 
   var frequency = $("#free").val().trim();
 
-  var currentTime = moment().format("HH:mm");
-  console.log("CURRENT TIME: " + moment(currentTime).format("HH:mm"));
-
+  //Experiments
+  //1. Experiment 1: Get rid of fTime. Observation: The error went away.
+  //2. Experiment 2: 
+  //     Assumption: fTIme doesn't work if it's an object. 50% sure.
+  //     Examine firstTime in the debugger. 
 
 
   var newTrain = {
@@ -34,7 +39,7 @@ $("#add-btn").on("click", function (event) {
     place: destination,
     fTime: firstTime,
     freq: frequency
-  }
+  };
 
   database.ref().push(newTrain);
 
@@ -44,27 +49,23 @@ $("#add-btn").on("click", function (event) {
   $("#first").val("");
   $("#free").val("");
 
-  return false;
-})
+
+});
 
 database.ref().on("child_added", function (snapshot) {
-  console.log(snapshot);
+  // console.log(snapshot);
 
   var trainName = snapshot.val().name;
-  var destination = snapshot.val().destination;
-  var firstTime = snapshot.val().firstTime;
-  var frequency = snapshot.val().frequency;
-
-  var trainTime = moment(firstTime, "HH:mm")
-
+  var destination = snapshot.val().place;
+  var firstTime = snapshot.val().fTime;
+  var frequency = snapshot.val().freq;
+  var trainTime = moment(firstTime, "HH:mm");
+  var currentTime = moment();
+  
   var difference = moment().diff(moment(trainTime), "minutes");
-
   var trainRemain = difference % frequency;
-
   var minUntil = frequency - trainRemain;
-
   var nextArrival = moment().add(minUntil, "minutes").format("HH:mm");
-
   var trainRow = $("<tr class='text-center'>").append(
     $("<td>").text(trainName),
     $("<td>").text(destination),
@@ -73,9 +74,9 @@ database.ref().on("child_added", function (snapshot) {
     $("<td>").text(minUntil)
   );
 
-  
+
   $("#time > tbody").append(trainRow);
-})
+});
 
 
 
